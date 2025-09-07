@@ -29,9 +29,9 @@ jobs:
         uses: Randomblock1/theos-action@v1.3
         with:
           orion: "true"
-
-       - name: Replace Substrate with correct device version
-         run: |
+          
+      - name: Replace Substrate with correct device version
+        run: |
           mkdir -p theos/vendor/lib/CydiaSubstrate.framework
           curl -L -o theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.dylib https://apt.thebigboss.org/repofiles/cydia/debs/mobilesubstrate_0.9.7100_iphoneos-arm.deb
           ar x theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.dylib

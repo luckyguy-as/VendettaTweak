@@ -29,7 +29,7 @@ jobs:
         uses: Randomblock1/theos-action@v1.3
         with:
           orion: "true"
-                    
+          
       - name: Install device-compatible CydiaSubstrate
         run: |
           MS_DEB="mobilesubstrate_0.9.5012_iphoneos-arm.deb"
@@ -42,18 +42,16 @@ jobs:
           # Make the Theos framework directory
           mkdir -p theos/vendor/lib/CydiaSubstrate.framework
 
-          # ✅ Copy the actual binary (not a folder)
+          # Copy the actual binary (not a folder)
           cp Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate theos/vendor/lib/CydiaSubstrate.framework/
 
-          # Create a minimal .tbd so the linker doesn't complain
-          echo -e "archs: [ arm64 ]\nplatform: ios\ninstall-name: /Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate\n" > theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.tbd
-
-      - name: Build package
+      - name: Build package (rootful)
         run: |
           rm -f packages/*
-          make package FINALPACKAGE=1
+          make package FINALPACKAGE=1 \
+            VendettaTweak_LDFLAGS="-L$(pwd)/theos/vendor/lib/CydiaSubstrate.framework -lCydiaSubstrate"
 
-      - name: Upload package
+      - name: Upload package (rootful)
         uses: actions/upload-artifact@v4
         with:
           name: "Package built by ${{ matrix.os }}"
@@ -62,7 +60,8 @@ jobs:
       - name: Build rootless package
         run: |
           rm -f packages/*
-          make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+          make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless \
+            VendettaTweak_LDFLAGS="-L$(pwd)/theos/vendor/lib/CydiaSubstrate.framework -lCydiaSubstrate"
 
       - name: Upload rootless package
         uses: actions/upload-artifact@v4

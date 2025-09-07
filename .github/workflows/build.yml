@@ -29,16 +29,24 @@ jobs:
         uses: Randomblock1/theos-action@v1.3
         with:
           orion: "true"
-          
-      - name: Replace Substrate with correct device version
+                    
+      - name: Install device-compatible CydiaSubstrate
         run: |
-           MS_DEB="mobilesubstrate_0.9.5012_iphoneos-arm.deb"
-           curl -OL http://apt.saurik.com/debs/$MS_DEB
-           ar x $MS_DEB
-           tar -xf data.tar.*
-           mkdir -p theos/vendor/lib/CydiaSubstrate.framework
-           cp Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate/CydiaSubstrate theos/vendor/lib/CydiaSubstrate.framework/
-           echo -e "archs: [ arm64 ]\nplatform: ios\ninstall-name: /Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate\n" > theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.tbd
+          MS_DEB="mobilesubstrate_0.9.5012_iphoneos-arm.deb"
+          curl -OL http://apt.saurik.com/debs/$MS_DEB
+
+          # Extract .deb contents using ar and tar
+          ar x $MS_DEB
+          tar -xf data.tar.*
+
+          # Make the Theos framework directory
+          mkdir -p theos/vendor/lib/CydiaSubstrate.framework
+
+          # ✅ Copy the actual binary (not a folder)
+          cp Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate theos/vendor/lib/CydiaSubstrate.framework/
+
+          # Create a minimal .tbd so the linker doesn't complain
+          echo -e "archs: [ arm64 ]\nplatform: ios\ninstall-name: /Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate\n" > theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.tbd
 
       - name: Build package
         run: |

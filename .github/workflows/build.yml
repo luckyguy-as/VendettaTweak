@@ -30,6 +30,17 @@ jobs:
         with:
           orion: "true"
 
+        - name: Replace Substrate with correct device version
+        run: |
+          mkdir -p theos/vendor/lib/CydiaSubstrate.framework
+          curl -L -o theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.dylib https://apt.thebigboss.org/repofiles/cydia/debs/mobilesubstrate_0.9.7100_iphoneos-arm.deb
+          ar x theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.dylib
+          tar -xzf data.tar.gz
+          cp Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate
+          # Create fake .tbd stub pointing to actual dylib
+          echo -e "---\narchs: [ arm64 ]\nplatform: ios\ninstall-name: /Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate\n" > theos/vendor/lib/CydiaSubstrate.framework/CydiaSubstrate.tbd
+
+
       - name: Build package
         run: |
           rm -f packages/*
